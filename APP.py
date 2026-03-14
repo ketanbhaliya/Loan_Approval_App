@@ -10,29 +10,21 @@ st.title("Credit Wise: Loan Approval Predictor")
 
 @st.cache_data
 def load_and_train():
-    # 1. Load your data
     df = pd.read_csv("loan_approval_data.csv")
-    
-    # 2. FIX: Drop rows where the target (Loan_Approved) is missing
-    # This removes the "Input y contains NaN" error
     df = df.dropna(subset=['Loan_Approved'])
     
-    # 3. Define features and target using your exact column names
     features = ['Applicant_Income', 'Coapplicant_Income', 'Credit_Score', 'Loan_Amount']
     target = 'Loan_Approved'
     
     X = df[features]
     y = df[target].map({'Yes': 1, 'No': 0})
     
-    # 4. Handle missing values in features (Imputer)
     imputer = SimpleImputer(strategy="mean")
     X_imputed = imputer.fit_transform(X)
     
-    # 5. Scale features
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_imputed)
     
-    # 6. Train Naive Bayes (your best model)
     model = GaussianNB()
     model.fit(X_scaled, y)
     
@@ -59,4 +51,3 @@ try:
 
 except Exception as e:
     st.error(f"Error: {e}")
-    st.info("Make sure 'loan_approval_data.csv' is uploaded to GitHub and contains the expected columns.")
