@@ -42,10 +42,10 @@ try:
     model, scaler = load_and_train()
 
     st.sidebar.header("Applicant Details")
-    app_inc = st.sidebar.number_input("Applicant Income ($)", min_value=0, value=5000)
-    co_inc = st.sidebar.number_input("Coapplicant Income ($)", min_value=0, value=0)
+    app_inc = st.sidebar.number_input("Applicant Income (₹)", min_value=0, value=5000)
+    co_inc = st.sidebar.number_input("Coapplicant Income (₹)", min_value=0, value=0)
     score = st.sidebar.slider("Credit Score", 300, 850, 700)
-    loan_amt = st.sidebar.number_input("Loan Amount ($)", min_value=0, value=20000)
+    loan_amt = st.sidebar.number_input("Loan Amount (₹)", min_value=0, value=20000)
 
     if st.button("Predict Approval Status"):
         user_input = np.array([[app_inc, co_inc, score, loan_amt]])
@@ -53,9 +53,9 @@ try:
         prediction = model.predict(user_scaled)
         
         if prediction[0] == 1:
-            st.success("🎉 Congratulations! The loan is likely to be **APPROVED**.")
+            st.success("Congratulations! The loan is likely to be **APPROVED**.")
         else:
-            st.error("❌ Sorry, the loan is likely to be **DENIED**.")
+            st.error("Sorry, the loan is likely to be **DENIED**.")
 
 except Exception as e:
     st.error(f"Error: {e}")
