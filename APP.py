@@ -5,31 +5,34 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 
-st.set_page_config(page_title="Credit Wise", page_icon="💰")
-st.title("💰 Credit Wise: Loan Approval Predictor")
+st.set_page_config(page_title="Credit Wise")
+st.title("Credit Wise: Loan Approval Predictor")
 
 @st.cache_data
 def load_and_train():
-    # Load your specific CSV
+    # 1. Load your data
     df = pd.read_csv("loan_approval_data.csv")
     
-    # These are the exact columns found in your notebook
+    # 2. FIX: Drop rows where the target (Loan_Approved) is missing
+    # This removes the "Input y contains NaN" error
+    df = df.dropna(subset=['Loan_Approved'])
+    
+    # 3. Define features and target using your exact column names
     features = ['Applicant_Income', 'Coapplicant_Income', 'Credit_Score', 'Loan_Amount']
     target = 'Loan_Approved'
     
     X = df[features]
-    # Map your 'Yes'/'No' to 1/0
     y = df[target].map({'Yes': 1, 'No': 0})
     
-    # Handle missing values as you did in your notebook
+    # 4. Handle missing values in features (Imputer)
     imputer = SimpleImputer(strategy="mean")
     X_imputed = imputer.fit_transform(X)
     
-    # Scale features
+    # 5. Scale features
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_imputed)
     
-    # Best model according to your project: Naive Bayes
+    # 6. Train Naive Bayes (your best model)
     model = GaussianNB()
     model.fit(X_scaled, y)
     
@@ -39,20 +42,21 @@ try:
     model, scaler = load_and_train()
 
     st.sidebar.header("Applicant Details")
-    app_inc = st.sidebar.number_input("Applicant Income", value=5000)
-    co_inc = st.sidebar.number_input("Coapplicant Income", value=0)
+    app_inc = st.sidebar.number_input("Applicant Income ($)", min_value=0, value=5000)
+    co_inc = st.sidebar.number_input("Coapplicant Income ($)", min_value=0, value=0)
     score = st.sidebar.slider("Credit Score", 300, 850, 700)
-    loan_amt = st.sidebar.number_input("Loan Amount", value=20000)
+    loan_amt = st.sidebar.number_input("Loan Amount ($)", min_value=0, value=20000)
 
-    if st.button("Predict Approval"):
+    if st.button("Predict Approval Status"):
         user_input = np.array([[app_inc, co_inc, score, loan_amt]])
         user_scaled = scaler.transform(user_input)
         prediction = model.predict(user_scaled)
         
         if prediction[0] == 1:
-            st.success("🎉 Loan Approved!")
+            st.success("🎉 Congratulations! The loan is likely to be **APPROVED**.")
         else:
-            st.error("❌ Loan Denied.")
+            st.error("❌ Sorry, the loan is likely to be **DENIED**.")
 
 except Exception as e:
-    st.error(f"Please ensure 'loan_approval_data.csv' is uploaded to GitHub. Error: {e}")
+    st.error(f"Error: {e}")
+    st.info("Make sure 'loan_approval_data.csv' is uploaded to GitHub and contains the expected columns.")
